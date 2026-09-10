@@ -152,6 +152,25 @@ Use the three forms deliberately:
 when `None` is an internal representation of omission. Do not use it to hide a
 `null` value that a JSON request can accept or a response can emit.
 
+### Require timezone-aware datetimes
+
+Use Pydantic's `AwareDatetime` for API fields that represent an instant. This
+rejects a datetime without a UTC offset when validating a request or response
+DTO:
+
+```python
+import pydantic
+
+
+class ScheduleRequest(pydantic.BaseModel):
+    starts_at: pydantic.AwareDatetime
+```
+
+Python's type system does not distinguish naive and aware `datetime.datetime`
+values. Enforce awareness when data enters through a Pydantic DTO, then let
+intermediate application code use `datetime.datetime` and rely on that
+invariant instead of repeatedly checking `tzinfo`.
+
 ## Route-owned responses
 
 A route owns the responses produced directly by its handler. In the usual case

@@ -12,6 +12,7 @@ directly from its directory or from this repository using a Git subdirectory.
 ## Guidance
 
 - [OpenAPI contracts with FastAPI and Pydantic](docs/openapi-schema.md)
+- [SQLAlchemy models and Alembic migrations](docs/sqlalchemy-alembic.md)
 
 Install a package from a pinned repository revision by selecting its
 subdirectory:
