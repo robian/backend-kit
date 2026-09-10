@@ -5,6 +5,7 @@ import typing
 from collections.abc import AsyncGenerator
 
 import fastapi
+import httpx2
 import pytest
 
 from fastapi_runtime import AppContextBinding
@@ -61,9 +62,15 @@ def test_reuses_application_tree_with_fresh_contexts() -> None:
     async def run_lifespan(name: str) -> None:
         with slot.use(_context_factory(name)):
             async with app.router.lifespan_context(app):
-                for current in (app, mounted_app, nested_app):
-                    request = fastapi.Request({"type": "http", "app": current})
-                    assert binding(request).catalog_name == name
+                transport = httpx2.ASGITransport(app=app)
+                async with httpx2.AsyncClient(
+                    transport=transport,
+                    base_url="http://testserver",
+                ) as client:
+                    for path in ("/context", "/api/context", "/duplicate/context"):
+                        response = await client.get(path)
+                        assert response.status_code == 200
+                        assert response.json() == {"catalog_name": name}
 
         for current in (app, mounted_app, nested_app):
             assert not hasattr(current.state, "_fastapi_runtime_context")

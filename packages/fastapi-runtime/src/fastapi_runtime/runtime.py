@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import contextlib
 import typing
 from collections.abc import AsyncGenerator
