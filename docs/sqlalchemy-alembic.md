@@ -241,9 +241,7 @@ class NaiveDatetimeError(ValueError):
 def require_aware(
     value: datetime.datetime | None,
 ) -> datetime.datetime | None:
-    if value is not None and (
-        value.tzinfo is None or value.utcoffset() is None
-    ):
+    if value is not None and (value.tzinfo is None or value.utcoffset() is None):
         raise NaiveDatetimeError("Naive datetime is not allowed")
     return value
 

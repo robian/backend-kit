@@ -132,8 +132,7 @@ async def search_products(
         ProductKind | SkipJsonSchema[None],
         fastapi.Query(),
     ] = None,
-) -> None:
-    ...
+) -> None: ...
 ```
 
 The resulting parameter is optional, but a transmitted value is limited to
