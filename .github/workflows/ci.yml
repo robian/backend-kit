@@ -76,10 +76,8 @@ jobs:
           python-version-file: .python-version
 
       - run: >-
-          uvx --isolated
-          --from pytest
-          --with-editable packages/fastapi-runtime
-          --with httpx2
+          uv run --isolated
+          --all-packages
           --with '${{ matrix.requirement }}'
           pytest
           -c packages/fastapi-runtime/pyproject.toml
