@@ -17,7 +17,7 @@ factory: ContextFactory[CatalogContext] = slot
 lifespan = binding.lifespan(factory)
 ContextDependency = typing.Annotated[
     CatalogContext,
-    fastapi.Depends(binding),
+    fastapi.Depends(binding.resolve),
 ]
 
 typing.assert_type(binding, AppContextBinding[CatalogContext])

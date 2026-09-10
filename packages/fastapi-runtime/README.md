@@ -24,7 +24,10 @@ class Context:
 
 
 context_binding = AppContextBinding(Context)
-ContextDependency = typing.Annotated[Context, fastapi.Depends(context_binding)]
+ContextDependency = typing.Annotated[
+    Context,
+    fastapi.Depends(context_binding.resolve),
+]
 
 
 def create_app(context_factory: ContextFactory[Context]) -> fastapi.FastAPI:

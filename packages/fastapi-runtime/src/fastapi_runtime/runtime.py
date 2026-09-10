@@ -26,7 +26,8 @@ class AppContextBinding[ContextT]:
     def __init__(self, context_type: type[ContextT]) -> None:
         self._context_type = context_type
 
-    def __call__(self, request: fastapi.Request) -> ContextT:
+    def resolve(self, request: fastapi.Request) -> ContextT:
+        """Resolve the context bound to the request's application."""
         context = getattr(request.app.state, _STATE_ATTRIBUTE, _MISSING)
         if not isinstance(context, self._context_type):
             raise RuntimeError(

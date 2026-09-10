@@ -32,7 +32,7 @@ def _create_app(
 ) -> tuple[fastapi.FastAPI, fastapi.FastAPI, fastapi.FastAPI]:
     context_dependency = typing.Annotated[
         CatalogContext,
-        fastapi.Depends(binding),
+        fastapi.Depends(binding.resolve),
     ]
 
     root = fastapi.FastAPI(lifespan=binding.lifespan(context_factory))
@@ -87,7 +87,7 @@ def test_context_dependency_fails_outside_lifespan() -> None:
     request = fastapi.Request({"type": "http", "app": app})
 
     with pytest.raises(RuntimeError, match="CatalogContext"):
-        binding(request)
+        binding.resolve(request)
 
 
 def test_context_factory_must_yield_expected_type() -> None:
