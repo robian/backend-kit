@@ -8,7 +8,7 @@ authors = [
     { name = "robian", email = "288016+robian@users.noreply.github.com" },
 ]
 dependencies = [
-    "fastapi>=0.139.0",
+    "fastapi>=0.133.1",
 ]
 
 [build-system]

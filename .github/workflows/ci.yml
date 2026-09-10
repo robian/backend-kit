@@ -52,3 +52,35 @@ jobs:
           --db-url postgresql+psycopg://postgres:postgres@localhost:5432/
 
       - run: uv build --all-packages
+
+  fastapi-compatibility:
+    name: FastAPI ${{ matrix.fastapi }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - fastapi: minimum
+            requirement: fastapi==0.133.1
+          - fastapi: latest
+            requirement: fastapi
+
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - uses: astral-sh/setup-uv@v8.3.0
+
+      - uses: actions/setup-python@v6.3.0
+        with:
+          python-version-file: .python-version
+
+      - run: >-
+          uvx --isolated
+          --from pytest
+          --with-editable packages/fastapi-runtime
+          --with httpx2
+          --with '${{ matrix.requirement }}'
+          pytest
+          -c packages/fastapi-runtime/pyproject.toml
+          packages/fastapi-runtime/tests

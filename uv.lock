@@ -169,7 +169,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "fastapi", specifier = ">=0.139.0" }]
+requires-dist = [{ name = "fastapi", specifier = ">=0.133.1" }]
 
 [[package]]
 name = "greenlet"
