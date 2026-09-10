@@ -9,6 +9,10 @@ directly from its directory or from this repository using a Git subdirectory.
 | [`pg-test-db`](packages/pg-test-db) | Fast PostgreSQL test databases cloned from an initialized template. |
 | [`typed-result`](packages/typed-result) | A small, strictly typed `Result[T, E]` with exhaustive pattern matching. |
 
+## Guidance
+
+- [OpenAPI contracts with FastAPI and Pydantic](docs/openapi-schema.md)
+
 Install a package from a pinned repository revision by selecting its
 subdirectory:
 
