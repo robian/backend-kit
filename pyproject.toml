@@ -1,0 +1,66 @@
+[project]
+name = "postgres-test-databases"
+version = "0.1.0"
+description = "Fast, isolated PostgreSQL test databases cloned from a migrated template"
+readme = "README.md"
+requires-python = ">=3.14"
+authors = [
+    { name = "robian", email = "288016+robian@users.noreply.github.com" },
+]
+dependencies = [
+    "psycopg[binary]>=3.2.10",
+    "sqlalchemy>=2.0.43",
+]
+
+[dependency-groups]
+dev = [
+    "build>=1.3.0",
+    "pyright>=1.1.411",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.15.20",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.0,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "postgres_test_databases"
+
+[tool.pytest.ini_options]
+filterwarnings = ["error"]
+testpaths = ["tests"]
+addopts = [
+    "--cov=postgres_test_databases",
+    "--cov-branch",
+    "--cov-report=term-missing",
+    "--cov-fail-under=100",
+]
+
+[tool.ruff]
+target-version = "py314"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "ASYNC", "RUF"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.pyright]
+pythonVersion = "3.14"
+venvPath = "."
+venv = ".venv"
+include = ["src", "tests"]
+strict = ["src", "tests"]
+reportImplicitOverride = true
+reportUnnecessaryTypeIgnoreComment = true
+reportUnknownMemberType = true
+reportUnknownVariableType = true
+reportUnknownArgumentType = true
+reportUnknownLambdaType = true
+reportUnknownParameterType = true
