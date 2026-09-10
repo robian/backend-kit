@@ -1,0 +1,19 @@
+[project]
+name = "fastapi-runtime"
+version = "0.1.0"
+description = "Typed application contexts for reusable FastAPI application trees"
+readme = "README.md"
+requires-python = ">=3.14"
+authors = [
+    { name = "robian", email = "288016+robian@users.noreply.github.com" },
+]
+dependencies = [
+    "fastapi>=0.139.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.0,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "fastapi_runtime"

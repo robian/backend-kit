@@ -5,6 +5,7 @@ directly from its directory or from this repository using a Git subdirectory.
 
 | Package | Purpose |
 | --- | --- |
+| [`fastapi-runtime`](packages/fastapi-runtime) | Fresh typed application contexts without rebuilding the FastAPI route tree. |
 | [`pg-test-db`](packages/pg-test-db) | Fast PostgreSQL test databases cloned from an initialized template. |
 | [`typed-result`](packages/typed-result) | A small, strictly typed `Result[T, E]` with exhaustive pattern matching. |
 
@@ -33,7 +34,8 @@ Run the checks:
 uv run ruff format --check .
 uv run ruff check .
 uv run pyright
-uv run pytest packages/pg-test-db/tests packages/typed-result/tests \
+uv run pytest packages/fastapi-runtime/tests packages/pg-test-db/tests \
+  packages/typed-result/tests \
   --db-url postgresql+psycopg://postgres:postgres@localhost:5432/
 uv build --all-packages
 ```

@@ -46,6 +46,7 @@ jobs:
 
       - run: >-
           uv run pytest
+          packages/fastapi-runtime/tests
           packages/pg-test-db/tests
           packages/typed-result/tests
           --db-url postgresql+psycopg://postgres:postgres@localhost:5432/
