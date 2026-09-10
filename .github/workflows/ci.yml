@@ -6,9 +6,13 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     services:
       postgres:
@@ -32,7 +36,7 @@ jobs:
         with:
           python-version-file: .python-version
 
-      - run: uv sync --locked --dev
+      - run: uv sync --locked --all-packages
 
       - run: uv run ruff format --check .
 
@@ -42,6 +46,8 @@ jobs:
 
       - run: >-
           uv run pytest
+          packages/pg-test-db/tests
+          packages/typed-result/tests
           --db-url postgresql+psycopg://postgres:postgres@localhost:5432/
 
-      - run: uv build
+      - run: uv build --all-packages

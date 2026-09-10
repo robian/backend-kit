@@ -1,0 +1,20 @@
+[project]
+name = "pg-test-db"
+version = "0.1.0"
+description = "Fast PostgreSQL test databases cloned from an initialized template"
+readme = "README.md"
+requires-python = ">=3.14"
+authors = [
+    { name = "robian", email = "288016+robian@users.noreply.github.com" },
+]
+dependencies = [
+    "psycopg[binary]>=3.2.10",
+    "sqlalchemy>=2.0.43",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.0,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "pg_test_db"

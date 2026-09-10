@@ -6,7 +6,7 @@ import pytest
 import sqlalchemy as sa
 from sqlalchemy.engine import URL
 
-from postgres_test_databases import create_template_db
+from pg_test_db import create_template_db
 
 
 def test_template_clones_are_isolated_and_cleaned_up(server_db_url: str) -> None:

@@ -1,56 +1,39 @@
-# postgres-test-databases
+# backend-kit
 
-Small, typed PostgreSQL lifecycle primitives for test suites that need both a
-fast shared database and selectively isolated databases.
+Small, independent Python backend components. Each package can be installed
+directly from its directory or from this repository using a Git subdirectory.
 
-The package creates and migrates one PostgreSQL template, seals it against
-connections, and creates inexpensive clones from it. Every public operation is
-context-managed so databases are removed when a test fails.
+| Package | Purpose |
+| --- | --- |
+| [`pg-test-db`](packages/pg-test-db) | Fast PostgreSQL test databases cloned from an initialized template. |
+| [`typed-result`](packages/typed-result) | A small, strictly typed `Result[T, E]` with exhaustive pattern matching. |
 
-```python
-from collections.abc import Iterator
+Install a package from a pinned repository revision by selecting its
+subdirectory:
 
-import pytest
-from postgres_test_databases import Database
-from postgres_test_databases import TemplateDatabase
-from postgres_test_databases import create_template_db
+```toml
+[project]
+dependencies = ["pg-test-db"]
 
-
-@pytest.fixture(scope="session")
-def template_database(server_db_url: str) -> Iterator[TemplateDatabase]:
-    with create_template_db(
-        server_db_url,
-        initialize=upgrade_schema,
-    ) as template:
-        yield template
-
-
-@pytest.fixture(scope="session")
-def shared_database(
-    template_database: TemplateDatabase,
-) -> Iterator[Database]:
-    with template_database.clone(prefix="myapp_shared_") as database:
-        yield database
-
-
-@pytest.fixture
-def isolated_database(
-    template_database: TemplateDatabase,
-) -> Iterator[Database]:
-    with template_database.clone(prefix="myapp_isolated_") as database:
-        yield database
+[tool.uv.sources]
+pg-test-db = { git = "https://github.com/robian/backend-kit.git", rev = "COMMIT_SHA", subdirectory = "packages/pg-test-db" }
 ```
 
-The migration callback receives a `sqlalchemy.URL` for the newly created
-template database. A server URL must not include a database name:
+## Development
 
-```python
-import sqlalchemy
+Install every workspace package and its development tools:
 
-
-def upgrade_schema(database_url: sqlalchemy.URL) -> None:
-    alembic.command.upgrade(make_alembic_config(database_url), "head")
+```console
+uv sync --all-packages
 ```
 
-The PostgreSQL role must be able to create and drop databases, mark a database
-as a template, and terminate connections to databases it owns.
+Run the checks:
+
+```console
+uv run ruff format --check .
+uv run ruff check .
+uv run pyright
+uv run pytest packages/pg-test-db/tests packages/typed-result/tests \
+  --db-url postgresql+psycopg://postgres:postgres@localhost:5432/
+uv build --all-packages
+```
