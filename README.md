@@ -11,6 +11,7 @@ directly from its directory or from this repository using a Git subdirectory.
 
 ## Guidance
 
+- [Structuring FastAPI application code](docs/application-structure.md)
 - [OpenAPI contracts with FastAPI and Pydantic](docs/openapi-schema.md)
 - [SQLAlchemy models and Alembic migrations](docs/sqlalchemy-alembic.md)
 - [Testing FastAPI and SQLAlchemy applications](docs/testing.md)
