@@ -35,7 +35,7 @@ def render(result: Result[int, DomainError]) -> str:
 
 def use_methods(result: Result[int, str]) -> None:
     assert_type(result.map(str), Ok[str] | Err[str])
-    assert_type(result.map_error(len), Ok[int] | Err[int])
+    assert_type(result.map_err(len), Ok[int] | Err[int])
     assert_type(result.unwrap(), int)
     assert_type(result.unwrap_err(), str)
     assert_type(result.unwrap_or(0), int)

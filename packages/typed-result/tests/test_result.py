@@ -14,7 +14,7 @@ def test_ok() -> None:
     assert result.is_ok()
     assert not result.is_err()
     assert result.map(str) == Ok("3")
-    assert result.map_error(_never_to_str) is result
+    assert result.map_err(_never_to_str) is result
     assert result.unwrap() == 3
     assert result.unwrap_or(4) == 3
     assert result.unwrap_or_raise(_never_to_exception) == 3
@@ -31,7 +31,7 @@ def test_err() -> None:
     assert not result.is_ok()
     assert result.is_err()
     assert result.map(_never_to_str) is result
-    assert result.map_error(str.upper) == Err("INVALID")
+    assert result.map_err(str.upper) == Err("INVALID")
     assert result.unwrap_err() == "invalid"
     assert result.unwrap_or(4) == 4
 

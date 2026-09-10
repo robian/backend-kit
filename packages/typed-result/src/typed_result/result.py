@@ -28,7 +28,7 @@ class Ok[T]:
     def map[U](self, function: Callable[[T], U]) -> Ok[U]:
         return Ok(function(self.value))
 
-    def map_error[F](self, function: Callable[[typing.Never], F]) -> Ok[T]:
+    def map_err[F](self, function: Callable[[typing.Never], F]) -> Ok[T]:
         del function
         return self
 
@@ -65,7 +65,7 @@ class Err[E]:
         del function
         return self
 
-    def map_error[F](self, function: Callable[[E], F]) -> Err[F]:
+    def map_err[F](self, function: Callable[[E], F]) -> Err[F]:
         return Err(function(self.error))
 
     def unwrap(self) -> typing.Never:
