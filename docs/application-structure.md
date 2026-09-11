@@ -30,6 +30,28 @@ or projection becomes large, move it into a specifically named module within
 the same route package, such as `_queries.py`. It remains part of that versioned
 API operation rather than becoming shared application behavior prematurely.
 
+## Keep nonblocking handlers and dependency factories async
+
+Build route maps explicitly with `build_router()` and
+`router.add_api_route(...)`, keeping handler definitions separate from
+registration so applications can compose routes with ordinary Python code.
+
+Use `async def` for nonblocking route handlers and FastAPI dependency factories,
+even when their bodies contain no `await`. FastAPI awaits async functions on the
+event loop and dispatches synchronous functions to worker threads. Returning a
+response or retrieving an object from an application context does not warrant
+that thread-pool hop.
+
+Use awaitable APIs for I/O or explicitly offload blocking work from the event
+loop. Ordinary helpers called directly by application code do not use FastAPI's
+dispatch machinery and can remain synchronous. See
+[FastAPI's execution model](https://fastapi.tiangolo.com/async/#very-technical-details).
+
+If a linter flags an intentional async handler or dependency with a synchronous
+body, use its supported syntax to suppress that finding locally. Keep the rule
+enabled elsewhere; do not remove `async` or add an artificial await just to
+satisfy the linter.
+
 ## Share behavior through application services
 
 When multiple handlers, jobs, commands, or other entrypoints need the same
