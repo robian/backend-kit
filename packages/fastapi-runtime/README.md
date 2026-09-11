@@ -7,6 +7,10 @@ Build the application and mount its routes once. A context factory supplies
 fresh runtime dependencies each time the application lifespan starts. The same
 context is available from the root application and nested FastAPI mounts.
 
+`AppContextBinding.resolve` is async so FastAPI resolves the context on the event
+loop without dispatching the lookup to a worker thread. Register it with
+`Depends` as shown below; direct Python callers use `await binding.resolve(request)`.
+
 ```python
 import contextlib
 import dataclasses

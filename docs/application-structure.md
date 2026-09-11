@@ -36,11 +36,13 @@ Build route maps explicitly with `build_router()` and
 `router.add_api_route(...)`, keeping handler definitions separate from
 registration so applications can compose routes with ordinary Python code.
 
-Use `async def` for nonblocking route handlers and FastAPI dependency factories,
-even when their bodies contain no `await`. FastAPI awaits async functions on the
-event loop and dispatches synchronous functions to worker threads. Returning a
-response or retrieving an object from an application context does not warrant
-that thread-pool hop.
+Use `async def` for nonblocking route handlers, dependency factories, and
+exception handlers, even when their bodies contain no `await`. FastAPI and
+Starlette await async functions on the event loop and dispatch synchronous
+functions to worker threads. Returning a response, retrieving an object from an
+application context, or mapping an exception to an error response does not
+warrant that thread-pool hop. This also applies to exception handlers registered
+explicitly through `app.add_exception_handler(...)`.
 
 Use awaitable APIs for I/O or explicitly offload blocking work from the event
 loop. Ordinary helpers called directly by application code do not use FastAPI's

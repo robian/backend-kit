@@ -87,7 +87,7 @@ def test_context_dependency_fails_outside_lifespan() -> None:
     request = fastapi.Request({"type": "http", "app": app})
 
     with pytest.raises(RuntimeError, match="CatalogContext"):
-        binding.resolve(request)
+        asyncio.run(binding.resolve(request))
 
 
 def test_context_factory_must_yield_expected_type() -> None:

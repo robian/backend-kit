@@ -26,7 +26,9 @@ class AppContextBinding[ContextT]:
     def __init__(self, context_type: type[ContextT]) -> None:
         self._context_type = context_type
 
-    def resolve(self, request: fastapi.Request) -> ContextT:
+    # Async keeps this nonblocking dependency lookup on FastAPI's event loop;
+    # a synchronous dependency would be dispatched to a worker thread.
+    async def resolve(self, request: fastapi.Request) -> ContextT:
         """Resolve the context bound to the request's application."""
         context = getattr(request.app.state, _STATE_ATTRIBUTE, _MISSING)
         if not isinstance(context, self._context_type):
