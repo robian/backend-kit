@@ -30,11 +30,23 @@ or projection becomes large, move it into a specifically named module within
 the same route package, such as `_queries.py`. It remains part of that versioned
 API operation rather than becoming shared application behavior prematurely.
 
-## Keep nonblocking handlers and dependency factories async
+## Put route composition in a router module
 
 Build route maps explicitly with `build_router()` and
 `router.add_api_route(...)`, keeping handler definitions separate from
 registration so applications can compose routes with ordinary Python code.
+
+For new resource packages, put `build_router()` in `router.py` alongside handler
+modules such as `create.py`, `get.py`, and `search.py`. Leave `__init__.py` empty
+and import the router module explicitly from the parent composition module.
+This gives route registration a named home and keeps its imports out of package
+initialization when callers only need a handler or DTO.
+
+Existing packages can retain a builder in `__init__.py` with a targeted lint
+exception when a structural change is not otherwise warranted. Defining the
+builder does not construct routes at import time; calling it does.
+
+## Keep nonblocking handlers and dependency factories async
 
 Use `async def` for nonblocking route handlers, dependency factories, and
 exception handlers, even when their bodies contain no `await`. FastAPI and
