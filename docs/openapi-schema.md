@@ -151,6 +151,31 @@ Use the three forms deliberately:
 when `None` is an internal representation of omission. Do not use it to hide a
 `null` value that a JSON request can accept or a response can emit.
 
+### Numeric values and units
+
+Prefer integers in explicit units for quantities with a defined precision.
+For example, represent durations as `duration_ms = 4500` rather than fractional
+seconds, and energy as `energy_wh = 1250` rather than fractional kWh. Include the
+unit in field names and describe it in the schema so consumers do not have to
+infer the scale.
+
+Choose units fine enough to preserve the required resolution. Use smaller units
+when whole milliseconds or Wh are insufficient. Define whether values between
+representable units are rejected or rounded, and specify the rounding rule.
+Convert vendor and display units at boundaries without passing exact values
+through binary floats.
+
+This avoids binary fractional rounding and the need to choose a JSON
+representation for decimal values. Keep integer ranges within the exact limits
+supported by consumers; JavaScript numbers, for example, cannot represent every
+integer beyond `2**53 - 1` in magnitude. Division and unit conversion may still
+require explicit rounding.
+
+Use `Decimal` when decimal arithmetic is required, with an explicit serialized
+representation and rounding policy. Use `float` when approximate numerical
+computation is intentional. A tolerance-based comparison changes the meaning
+of equality; it does not repair a numeric type that cannot meet the contract.
+
 ### Require timezone-aware datetimes
 
 Use Pydantic's `AwareDatetime` for API fields that represent an instant. This
