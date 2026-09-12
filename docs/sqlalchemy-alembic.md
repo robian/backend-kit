@@ -366,6 +366,16 @@ or an integrity check before the transaction ends.
 Passing a session through the complete operation also makes transaction scope,
 locking, and read-after-write behavior explicit.
 
+Success commits; exceptions, including `RequestRejected`, roll back. When a
+use case returns an error value, its entrypoint must raise the mapped exception
+before leaving the transaction boundary. Returning an HTTP error response
+normally would instead commit pending writes.
+
+If a failed-attempt counter must survive rejection, persist it in an explicitly
+separate transaction and session. A savepoint does not survive rollback of its
+outer transaction. Keep this exceptional persistence separate from the rejected
+operation's writes; do not add a commit option to an HTTP exception.
+
 ## Package and run migrations reliably
 
 Store the Alembic environment and revision files inside an installable Python

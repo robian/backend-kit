@@ -15,6 +15,11 @@ Treat Pydantic models used at the API boundary as data transfer objects. Their
 types, required fields, defaults, and discriminators should describe serialized
 requests and responses precisely.
 
+Use `model_config = ConfigDict(strict=True)` on JSON DTOs, including nested
+DTOs, so validation rejects values such as `"123"` for an integer field instead
+of silently converting them. Any coercion must be an explicit, documented part
+of the contract.
+
 Python-side convenience belongs outside those models when it would weaken the
 wire contract. For example, use a factory function to supply repeated constants
 instead of making a response field optional through a default.
@@ -197,27 +202,27 @@ invariant instead of repeatedly checking `tzinfo`.
 
 ## Route-owned responses
 
-A route owns the responses produced directly by its handler. In the usual case
-that means:
+JSON handlers return their success DTO and raise for unsuccessful outcomes.
+Omit `response_model` so FastAPI derives the success schema from the handler's
+return annotation. Set `status_code` at registration when success is not 200.
+Do not override it by mutating an injected `Response`. File streams and
+no-content responses retain their appropriate response types.
 
-- one strongly typed successful response;
-- optionally, one or more route-specific unsuccessful responses;
-- an exhaustive conversion from the route's business result into those
-  responses.
+Represent route-specific rejections with a route-owned error DTO. Raise a shared
+`RequestRejected(error_dto)` exception and have one async exception handler
+serialize that DTO as the body of a 400 response. The exception accepts neither
+a status-code override nor a commit flag. Use the generic exceptions for other
+failure categories. Error codes and exhaustive mappings from use-case errors
+remain owned by the route; mapping functions return exceptions, and the handler
+raises them.
 
-These response models should be declared directly on the route so that FastAPI
-includes them in OpenAPI. A generated client can then represent the operation
-as a status-discriminated union and make callers handle every declared outcome.
+This keeps handlers callable as ordinary Python functions: callers receive a
+success DTO or catch an exception, without unpacking a `JSONResponse`.
 
-Keep the applicable responses visible at route registration. Avoid accumulating
-response declarations implicitly through several nested routers: the modest
-repetition makes the contract of an individual route easier to inspect and
-change.
-
-This guidance does not assign meanings to particular HTTP status codes. Each
-application decides which statuses and response shapes represent its outcomes.
-The requirement is only that the declarations accurately describe those
-decisions.
+Declare the 400 error DTO and applicable generic error schemas in `responses`
+at route registration. This metadata documents OpenAPI; it does not dispatch,
+validate, or select runtime responses. Keep those declarations visible rather
+than accumulating them through nested routers.
 
 ## Stable operation identifiers
 

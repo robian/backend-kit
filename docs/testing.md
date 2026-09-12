@@ -198,6 +198,36 @@ Prefer several focused recipes over a universal graph builder with dozens of
 flags. A recipe should represent a recognizable state needed by tests, not an
 alternative domain model or a second implementation of application behavior.
 
+## Validate API responses with DTOs
+
+Validate response bodies using the endpoint's response DTO before asserting
+field values. Prefer `ResponseDTO.model_validate_json(response.content)` over
+accessing untyped dictionaries from `response.json()`. Apply this to success and
+error responses where a DTO exists. Keep explicit assertions for expected values
+and behavior.
+
+JSON DTOs should declare `model_config = ConfigDict(strict=True)` as described
+in the [API contract guidance](openapi-schema.md#api-models-describe-the-wire-format).
+Validate the original response JSON so coercion cannot hide incorrect JSON
+field types while JSON representations of UUIDs and datetimes remain supported.
+
+## Keep tests explicit and focused
+
+Prefer direct calls over selecting known functions with `getattr` and passing
+untyped argument dictionaries. Prefer typed recording fakes over inspecting
+arbitrary values in mock call records. Remove redundant conversions when the
+other checkers and runtime tests confirm they are unnecessary.
+
+Review the value of a test before repairing its typing. Tests that merely repeat
+DTO fields, enum values, descriptions, route registrations, or Pydantic-generated
+OpenAPI fragments add maintenance without exercising application behavior.
+Prefer HTTP tests of actual outcomes, DTO validation, and persistence assertions.
+Type checkers can expose awkward test machinery; they cannot decide whether a
+test is worth keeping.
+
+See [Python tooling](python-tooling.md#type-checkers) for validated checker
+settings and workarounds.
+
 ## Reuse the FastAPI route tree
 
 Constructing and mounting a large FastAPI route tree can be considerably more
@@ -234,9 +264,41 @@ Prefer small fakes with explicit behavior. A dependency that should not be used
 by a test can raise `AssertionError` when called. This fails closer to the
 unexpected interaction than a loosely configured mock returning another mock.
 
+For an interface with several methods, a shared test-support base can implement
+each method by raising `NotImplementedError`. A focused fake inherits it and
+overrides only the operations the test expects. Inherit the production interface
+and keep explicit signatures and `@override` declarations. A recording fake can
+collect typed observations such as `batch_sizes: list[int]`, allowing ordinary
+assertions without extracting unknown values from mock call records.
+
 Use monkeypatching only for unavoidable process-global or third-party state.
 Do not patch application internals when an explicit dependency can represent
 the same boundary more clearly.
+
+## Preserve interface checks when using mocks
+
+When a mock is useful, prefer `mock.create_autospec(Interface, instance=True)`.
+It checks method call signatures at runtime; `mock.Mock(spec=Interface)` only
+restricts attribute access. Autospec does not validate argument or return-value
+types. Mock typing deliberately permits substitution for other types, so a
+typechecker accepting a mock does not prove that it implements the interface.
+
+If callers inspect calls or configure return values, annotate the helper with
+the mock type so those controls remain available. For an interface whose
+instances are not callable, autospec returns a `NonCallableMagicMock`. Use its
+`NonCallableMock` base and an assertion to narrow the factory's `Any` return:
+
+```python
+from unittest import mock
+
+from example.integrations.mail import MailClient
+
+
+def mail_client_mock() -> mock.NonCallableMock:
+    client = mock.create_autospec(MailClient, instance=True)
+    assert isinstance(client, mock.NonCallableMock)
+    return client
+```
 
 ## Keep test-support code proportionate
 
