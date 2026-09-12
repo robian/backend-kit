@@ -250,14 +250,14 @@ under test.
 
 ## Replace external systems at explicit boundaries
 
-Tests may use application-owned fakes for external identity providers, mail
+Prefer typed, application-owned fakes for external identity providers, mail
 delivery, object storage, payment providers, and other remote systems. Construct
 those fakes as part of the test context and inject them through the same
 interfaces used by production adapters.
 
-Prefer small fakes with explicit behavior. A dependency that should not be used
-by a test can raise `AssertionError` when called. This fails closer to the
-unexpected interaction than a loosely configured mock returning another mock.
+Keep method signatures tied to the production interface and use `@override`.
+Record calls in typed collections so tests can assert on arguments directly.
+Unexpected calls should fail by default.
 
 For an interface with several methods, a shared test-support base can implement
 each method by raising `NotImplementedError`. A focused fake inherits it and
@@ -266,34 +266,88 @@ and keep explicit signatures and `@override` declarations. A recording fake can
 collect typed observations such as `batch_sizes: list[int]`, allowing ordinary
 assertions without extracting unknown values from mock call records.
 
+When tests need different combinations of operations, use a shared configurable
+fake with separate typed outcomes and call records for each method. The app
+fixture and test receive the same fake instance; the test configures its
+expected outcomes before exercising the app. No subclass per combination is
+needed. If startup calls the client, configure those outcomes before startup.
+
+For example, this complete example uses a small client protocol; in application
+tests, import the production interface instead:
+
+```python
+from collections import deque
+from typing import Protocol
+from typing import override
+
+
+class Client(Protocol):
+    async def submit(self, payload: str) -> str: ...
+    async def status(self, receipt_id: str) -> str: ...
+
+
+def take_outcome[T](outcomes: deque[T | Exception], method: str) -> T:
+    if not outcomes:
+        raise AssertionError(f"Unexpected {method} call")
+    outcome = outcomes.popleft()
+    if isinstance(outcome, Exception):
+        raise outcome
+    return outcome
+
+
+class FakeClient(Client):
+    def __init__(self) -> None:
+        self.submit_outcomes: deque[str | Exception] = deque()
+        self.status_outcomes: deque[str | Exception] = deque()
+        self.submit_calls: list[str] = []
+        self.status_calls: list[str] = []
+
+    @override
+    async def submit(self, payload: str) -> str:
+        self.submit_calls.append(payload)
+        return take_outcome(self.submit_outcomes, "submit")
+
+    @override
+    async def status(self, receipt_id: str) -> str:
+        self.status_calls.append(receipt_id)
+        return take_outcome(self.status_outcomes, "status")
+
+
+async def test_client_script() -> None:
+    client = FakeClient()
+    client.submit_outcomes.append("receipt-1")
+    client.status_outcomes.extend(["pending", "completed"])
+
+    receipt = await client.submit("payload")
+    assert await client.status(receipt) == "pending"
+    assert await client.status(receipt) == "completed"
+
+    assert client.submit_calls == ["payload"]
+    assert client.status_calls == ["receipt-1", "receipt-1"]
+    assert not client.submit_outcomes
+    assert not client.status_outcomes
+```
+
+In an application test, exercise the real handler or service in place of the
+direct client calls above. Queue exception instances to script failures. Empty
+queues reject extra calls; assertions on call records and remaining outcomes
+catch missing calls, even when application code catches the fake's exceptions.
+Separate call lists do not enforce ordering between different methods; record
+a shared typed event sequence only when that ordering matters to the test.
+
+Keep the fake specific to the client and actual test needs. Scripted interactions
+have complexity whether expressed in a fake or in mock `side_effect` callbacks;
+typed fakes make their arguments and results statically checkable.
+
+Use mocks when they materially simplify a narrow third-party or process-global
+interaction. Autospec checks call signatures at runtime, but does not validate
+argument or return-value types. A typechecker accepting a mock as an interface
+does not prove that the mock implements it. Narrowing an autospec result to a
+mock class does not restore those interface guarantees.
+
 Use monkeypatching only for unavoidable process-global or third-party state.
 Do not patch application internals when an explicit dependency can represent
 the same boundary more clearly.
-
-## Preserve interface checks when using mocks
-
-When a mock is useful, prefer `mock.create_autospec(Interface, instance=True)`.
-It checks method call signatures at runtime; `mock.Mock(spec=Interface)` only
-restricts attribute access. Autospec does not validate argument or return-value
-types. Mock typing deliberately permits substitution for other types, so a
-typechecker accepting a mock does not prove that it implements the interface.
-
-If callers inspect calls or configure return values, annotate the helper with
-the mock type so those controls remain available. For an interface whose
-instances are not callable, autospec returns a `NonCallableMagicMock`. Use its
-`NonCallableMock` base and an assertion to narrow the factory's `Any` return:
-
-```python
-from unittest import mock
-
-from example.integrations.mail import MailClient
-
-
-def mail_client_mock() -> mock.NonCallableMock:
-    client = mock.create_autospec(MailClient, instance=True)
-    assert isinstance(client, mock.NonCallableMock)
-    return client
-```
 
 ## Keep test-support code proportionate
 
