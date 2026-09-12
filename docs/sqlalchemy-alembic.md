@@ -165,6 +165,24 @@ Keep the projection and its Pydantic model next to each other or otherwise make
 their connection obvious. A change to either side must fail validation rather
 than silently producing a malformed API response.
 
+### Return typed results from projection queries
+
+For complex projections, let a query function own filtering, ordering,
+pagination, execution, and DTO validation. Accept the session and explicit
+filter arguments, and return DTOs or a typed search result. Keep SQLAlchemy rows
+and unvalidated JSON inside that function. When returning a total count, apply
+the same filters and calculate it before pagination.
+
+With strict DTOs, select the JSONB projection as SQL text and use
+`TypeAdapter.validate_json()`. JSON validation accepts JSON representations of
+UUIDs and dates; strict Python-mode validation expects their Python instances.
+
+Test these queries against PostgreSQL. Cover nested values, missing optional
+joins, filters, and pagination totals. An absent joined object should produce
+JSON null when the DTO expects `None`, rather than an object whose fields are
+all null. These tests verify the SQL projection and its DTO contract; static
+checking protects callers after validation.
+
 ## Make database types explicit
 
 Use `Mapped[T]` for every mapped attribute and centralize repeated type mappings

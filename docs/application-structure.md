@@ -66,6 +66,22 @@ body, use its supported syntax to suppress that finding locally. Keep the rule
 enabled elsewhere; do not remove `async` or add an artificial await just to
 satisfy the linter.
 
+## Keep dependency factories and aliases together
+
+Keep dependency factories and their `Annotated` aliases in one `dependency.py`
+module. Define each alias immediately after its factory, with dependencies
+ordered before the factories that consume them. Avoid separate `types.py` and
+`factories.py` modules that must import each other.
+
+Use a `Dependency` suffix for injected parameter aliases, such as
+`SessionDependency = Annotated[db.Session, Depends(get_session)]`. Keep factory
+return annotations and application-service parameters expressed in the actual
+application type, such as `db.Session`. The alias describes FastAPI injection;
+it does not introduce a different session type.
+
+Keep this module together until there is a concrete reason to split it. Import
+it directly rather than re-exporting its contents through `__init__.py`.
+
 ## Share behavior through application services
 
 When multiple handlers, jobs, commands, or other entrypoints need the same
