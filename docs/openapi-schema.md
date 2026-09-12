@@ -307,8 +307,6 @@ Use tests and generation checks where they provide meaningful evidence:
 
 - Test each centralized exception handler's status and serialized response
   shape.
-- Inspect representative routes in the generated OpenAPI document to verify
-  that applicable generic responses are present.
 - Generate frontend types, operation definitions, and runtime schemas from the
   same OpenAPI document.
 - Fail continuous integration when generated frontend artifacts are stale.
