@@ -206,11 +206,6 @@ accessing untyped dictionaries from `response.json()`. Apply this to success and
 error responses where a DTO exists. Keep explicit assertions for expected values
 and behavior.
 
-JSON DTOs should declare `model_config = ConfigDict(strict=True)` as described
-in the [API contract guidance](openapi-schema.md#api-models-describe-the-wire-format).
-Validate the original response JSON so coercion cannot hide incorrect JSON
-field types while JSON representations of UUIDs and datetimes remain supported.
-
 ## Keep tests explicit and focused
 
 Prefer direct calls over selecting known functions with `getattr` and passing

@@ -15,11 +15,6 @@ Treat Pydantic models used at the API boundary as data transfer objects. Their
 types, required fields, defaults, and discriminators should describe serialized
 requests and responses precisely.
 
-Use `model_config = ConfigDict(strict=True)` on JSON DTOs, including nested
-DTOs, so validation rejects values such as `"123"` for an integer field instead
-of silently converting them. Any coercion must be an explicit, documented part
-of the contract.
-
 Python-side convenience belongs outside those models when it would weaken the
 wire contract. For example, use a factory function to supply repeated constants
 instead of making a response field optional through a default.

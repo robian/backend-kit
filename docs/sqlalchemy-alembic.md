@@ -173,10 +173,6 @@ filter arguments, and return DTOs or a typed search result. Keep SQLAlchemy rows
 and unvalidated JSON inside that function. When returning a total count, apply
 the same filters and calculate it before pagination.
 
-With strict DTOs, select the JSONB projection as SQL text and use
-`TypeAdapter.validate_json()`. JSON validation accepts JSON representations of
-UUIDs and dates; strict Python-mode validation expects their Python instances.
-
 Test these queries against PostgreSQL. Cover nested values, missing optional
 joins, filters, and pagination totals. An absent joined object should produce
 JSON null when the DTO expects `None`, rather than an object whose fields are
