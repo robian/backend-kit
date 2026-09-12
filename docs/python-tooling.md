@@ -97,9 +97,8 @@ unpacking preserves individual column types. Complex JSONB projections should
 be validated into DTOs at the database boundary and exercised against PostgreSQL;
 see [rich projections](sqlalchemy-alembic.md#build-rich-projections-deliberately).
 
-The review also removed low-value schema tests and replaced dynamic test machinery
-with direct calls and typed fakes. See the [testing guidance](testing.md#keep-tests-explicit-and-focused)
-for the distinction between checking types and deciding what is worth testing.
+See the [testing guidance](testing.md#keep-tests-explicit-and-focused) for choosing
+useful assertions and keeping test helpers typed.
 
 ### Validated checker settings
 
@@ -207,10 +206,7 @@ unknown-argument-type = "ignore"
 unknown-variable-type = "ignore"
 ```
 
-Other findings were addressed without suppression: explicit return annotations,
-runtime narrowing at dynamic boundaries, concrete database exception types,
-typed SQL expressions, and `math.pow()` where a floating-point result was
-appropriate. SQLAlchemy `type_coerce()` supplies expression type information;
+SQLAlchemy `type_coerce()` supplies expression type information;
 it does not validate values or emit a SQL cast. A Python `typing.cast()` likewise
 needs a justified invariant rather than being used simply to obtain a clean run.
 

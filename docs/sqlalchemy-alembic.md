@@ -81,10 +81,9 @@ how an entity is initialized.
 
 Keeping all mapped classes in one dedicated `entities.py` is reasonable even
 when the file becomes large. The file remains a mechanical declaration of the
-database mapping and keeps the complete mapping easy to find. Do not split it
-into domain modules merely because of its size: domain-oriented files invite
-business logic and other non-mapping responsibilities into ORM classes. Keep
-the declarative base and shared SQL types in small separate modules.
+database mapping and keeps the complete mapping easy to find. There is no need
+to split it into domain modules solely because of its size. Keep the declarative
+base and shared SQL types in small separate modules.
 
 ## Keep joins explicit
 
@@ -451,14 +450,13 @@ Create the database-test template by applying the complete Alembic history to an
 empty PostgreSQL database. Clone that migrated template for isolated tests. This
 keeps tests fast while ensuring that ORM queries run against the real schema.
 
-For each new revision, test at least:
+Check that applying the complete history reaches the expected Alembic heads.
+For revisions that transform existing data, test the upgrade from the immediate
+predecessor with representative data. Add focused checks for the data,
+constraints, indexes, or seed rows the revision changes.
 
-- an empty database upgraded through the complete history;
-- the immediate predecessor upgraded with representative existing data;
-- required transformed data, constraints, indexes, and seed rows;
-- concurrent migration attempts when the migration runner owns locking;
-- agreement between the final database revisions and the expected Alembic
-  heads.
+Test concurrent migration attempts in the migration runner's tests when it owns
+locking; this does not need a separate test for every revision.
 
 Run strict type checking and formatting over the Alembic environment and
 revision scripts as well as the application. Migration code executes in
